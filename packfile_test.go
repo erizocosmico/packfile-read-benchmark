@@ -3,6 +3,8 @@ package benchmark
 import (
 	"testing"
 
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
+
 	git "gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
@@ -47,9 +49,14 @@ func runDecoderCase(b *testing.B, offsets []uint64) {
 		}
 
 		for _, offset := range offsets {
-			_, err := dec.DecodeObjectAt(int64(offset))
+			obj, err := dec.DecodeObjectAt(int64(offset))
 			if err != nil {
 				b.Errorf("error getting object at index %d: %s", offset, err)
+			}
+
+			_, err = object.DecodeObject(r.Storer, obj)
+			if err != nil {
+				b.Errorf("unable to decode object at index %d: %s", offset, err)
 			}
 		}
 	}
